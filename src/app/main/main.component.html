@@ -19,10 +19,15 @@
   </div>
   <div class="button-row">
     <button class="button-primary" (click)="getBlackCard()" *ngIf="activePlayer && selectedBlackCard.text.length === 0">Get Black Card</button>
-    <button class="button-primary">Submit</button>
+    <button class="button-primary" (click)="submit()">Submit</button>
   </div>
-  <div class="card-hand">
+  <div class="card-hand" *ngIf="!activePlayer">
       <ng-container *ngFor="let card of cards">
+        <app-card [card]="card" class="card" (click)="onClick($event)"></app-card>
+      </ng-container>
+  </div>
+  <div class="card-hand" *ngIf="activePlayer">
+      <ng-container *ngFor="let card of submissions">
         <app-card [card]="card" class="card" (click)="onClick($event)"></app-card>
       </ng-container>
   </div>

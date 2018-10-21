@@ -9,16 +9,36 @@ import { CardsService } from '../cards.service';
 export class MainComponent implements OnInit {
 
   cards = [];
+  submissions = [];
   selectedCard;
   blackCardVisible = false;
   selectedBlackCard = { text: '' };
   blackCardFocus = false;
+  numPlayers: number;
   @Input() activePlayer: boolean;
+  @Input() roomId: string;
+  @Input() playerName: string;
 
   constructor(private cardsService: CardsService) { }
 
   ngOnInit() {
-    this.cards = this.cardsService.getNumWhiteCards(10);
+    this.cardsService.getPlayerStatus(this.roomId, this.playerName)
+      .then((status) => {
+        this.activePlayer = status.active;
+        if (!this.activePlayer) {
+          this.blackCardVisible = true;
+        }
+        return this.cardsService.getWhiteCards(this.roomId, 10)
+      })
+      .then(response => {
+        this.cards = response;
+        if (!this.activePlayer) {
+          this.pingBlackCard();
+        }
+      })
+      .catch(err => {
+        console.error(err);
+      });
   }
 
   onClick(event) {
@@ -35,9 +55,77 @@ export class MainComponent implements OnInit {
     }
   }
 
+  submit() {
+    this.cardsService.submitWhiteCard(this.selectedCard, this.roomId, this.playerName)
+      .then(() => {
+        let promise = null;
+        if (this.activePlayer) {
+          this.submissions = [];
+          promise = Promise.resolve();
+        } else {
+          for (let i = this.cards.length - 1; i >= 0; i--) {
+            if (this.cards[i] === this.selectedCard) {
+              this.cards.splice(i, 1);
+            }
+          }
+          promise = this.cardsService.getWhiteCards(this.roomId, 10 - this.cards.length);
+        }
+        return promise;
+      })
+      .then(() => {
+        this.selectedCard = null;
+        return this.cardsService.getPlayerStatus(this.roomId, this.playerName);
+      })
+      .then(playerResponse => {
+        this.activePlayer = playerResponse.active;
+      })
+      .catch(err => {
+        console.error(err);
+      });
+  }
+
+  pingBlackCard() {
+    const self = this;
+    this.cardsService.getBlackCard(this.roomId)
+      .then(response => {
+        if (response) {
+          console.log(response);
+          this.blackCardVisible = true;
+          this.selectedBlackCard = response;
+        } else {
+          setTimeout(() => { self.pingBlackCard() }, 1000);
+        }
+      })
+      .catch(err => {
+        console.error(err);
+      });
+  }
+
   getBlackCard() {
-    this.selectedBlackCard = this.cardsService.getBlackCard();
-    this.blackCardVisible = true;
+    this.cardsService.getNewBlackCard(this.roomId)
+      .then(response => {
+        this.blackCardVisible = true;
+        this.selectedBlackCard = response.card;
+        this.numPlayers = response.roomSize;
+        this.pingSubmissions();
+      })
+      .catch(err => {
+        console.error(err);
+      });
+  }
+
+  pingSubmissions() {
+    const self = this;
+    this.cardsService.getSubmissions(this.roomId)
+      .then(submissions => {
+        this.submissions = submissions;
+        if (this.submissions.length < this.numPlayers - 1) {
+          setTimeout(() => { self.pingSubmissions() }, 1000);
+        }
+      })
+      .catch(err => {
+        console.error(err);
+      });
   }
 
   toggleCard() {

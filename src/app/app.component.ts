@@ -10,10 +10,15 @@ import { CardsService } from './cards.service';
 })
 export class AppComponent {
   roomId: string;
+  name: string;
 
-  constructor() { }
+  constructor(private cardsService: CardsService) { }
 
-  submit(id) {
-    this.roomId = id;
+  submit(id, name) {
+    this.cardsService.createRoom(id, name)
+      .then(() => {
+        this.roomId = id;
+        this.name = name;
+      })
   }
 }

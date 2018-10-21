@@ -1,6 +1,10 @@
-<div class="app-main" *ngIf="!!roomId">
-  HELLO
-  <input #roomId />
-  <button (click)="submit(roomId.value)">Submit</button>
+<div class="app-main" *ngIf="!roomId">
+  <div class="room-input-container">
+    <label class="input-label">Nickname</label>
+    <input class="room-input" #name maxlength="12"/>
+    <label class="input-label" style="margin-top: 20px">Room ID</label>
+    <input class="room-input" #roomId maxlength="4"/>
+    <div><button (click)="submit(roomId.value, name.value)" class="button-primary">Submit</button></div>
+  </div>
 </div>
-<ng-container *ngIf="!roomId"><app-main [activePlayer]="true"></app-main></ng-container>
+<ng-container *ngIf="roomId"><app-main [activePlayer]="true" [roomId]="roomId" [playerName]="name"></app-main></ng-container>

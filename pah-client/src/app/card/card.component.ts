@@ -8,6 +8,7 @@ import { Component, OnInit, Input } from '@angular/core';
 export class CardComponent implements OnInit {
 
   @Input() card: any;
+  @Input() selected: boolean;
 
   constructor() { }
 

@@ -17,17 +17,55 @@ export class CardsService {
   createRoom(id, name) {
     const self = this;
     return new Promise((resolve, reject) => {
-      this.http.post('http://localhost:8000/api/room', { id: id, name: name })
+      this.http.post('https://partycards.localtunnel.me/api/room', { id: id.toLowerCase(), name: name.toLowerCase() })
         .subscribe((response: any) => {
           resolve();
         });
     });
   }
 
+  getRoomInfo(roomId): Promise<any> {
+    const self = this;
+    return new Promise((resolve, reject) => {
+      this.http.get('http://partycards.localtunnel.me/api/room/' + roomId.toLowerCase())
+        .subscribe((response: any) => {
+          resolve(response.data);
+        });
+    });
+  }
+
+  startGame(roomId) {
+    const self = this;
+    return new Promise((resolve, reject) => {
+      this.http.get('http://partycards.localtunnel.me/api/room/' + roomId.toLowerCase() + '/start')
+        .subscribe((response: any) => {
+          resolve();
+        });
+    });
+  }
+
+  getWaitingPlayers(roomId): Promise<any[]> {
+    return new Promise((resolve, reject) => {
+      this.getRoomInfo(roomId)
+        .then(response => {
+          const players = response.players;
+          const submissions = response.submissions;
+          players.splice(response.activePlayer, 1);
+          for (let submission of submissions) {
+            let i = players.indexOf(submission.name);
+            if (i > -1) {
+              players.splice(i, 1);
+            }
+          }
+          resolve(players);
+        })
+    });
+  }
+
   getCards() {
     const self = this;
     return new Promise((resolve, reject) => {
-      this.http.get('http://localhost:8000/api/cards')
+      this.http.get('http://partycards.localtunnel.me/api/cards')
         .subscribe((response: any) => {
           self.cards = response.data;
           self.blackCards = self.cards.blackCards;
@@ -37,30 +75,10 @@ export class CardsService {
     });
   }
 
-  getPlayerStatus(roomId, name): Promise<any> {
-    const self = this;
-    return new Promise((resolve, reject) => {
-      this.http.get('http://localhost:8000/api/room/' + roomId + '/player/' + name)
-        .subscribe((response: any) => {
-          resolve(response.data);
-        });
-    });
-  }
-
   getWhiteCards(roomId, num): Promise<any[]> {
-    // const cardSet = [];
-    // for (let i = 0; i < num; i++) {
-    //   let rand = Math.floor(Math.random() * this.whiteCards.length);
-    //   while (this.usedCards.indexOf(this.whiteCards[rand]) > -1) {
-    //     rand = Math.floor(Math.random() * this.whiteCards.length);
-    //   }
-    //   cardSet.push(this.whiteCards[rand]);
-    //   this.usedCards.push(this.whiteCards[rand]);
-    // }
-    // return cardSet;
     const self = this;
     return new Promise((resolve, reject) => {
-      this.http.get('http://localhost:8000/api/room/' + roomId + '/cards-white/' + num)
+      this.http.get('http://partycards.localtunnel.me/api/room/' + roomId.toLowerCase() + '/cards-white/' + num)
         .subscribe((response: any) => {
           resolve(response.data);
         });
@@ -70,7 +88,7 @@ export class CardsService {
   getBlackCard(roomId): Promise<any> {
     const self = this;
     return new Promise((resolve, reject) => {
-      this.http.get('http://localhost:8000/api/room/' + roomId + '/cards-black')
+      this.http.get('http://partycards.localtunnel.me/api/room/' + roomId.toLowerCase() + '/cards-black')
         .subscribe((response: any) => {
           resolve(response.data);
         });
@@ -78,28 +96,19 @@ export class CardsService {
   }
 
   getNewBlackCard(roomId): Promise<any> {
-    // let blackCard = null;
-    // let rand = Math.floor(Math.random() * this.blackCards.length);
-    // while (this.usedCards.indexOf(this.blackCards[rand].text) > -1) {
-    //   rand = Math.floor(Math.random() * this.blackCards.length);
-    // }
-    // blackCard = this.blackCards[rand];
-    // this.usedCards.push(blackCard.text);
-    // blackCard.text = blackCard.text.replace(/_/g, '_____');
-    // return blackCard;
     const self = this;
     return new Promise((resolve, reject) => {
-      this.http.get('http://localhost:8000/api/room/' + roomId + '/cards-black/new')
+      this.http.get('http://partycards.localtunnel.me/api/room/' + roomId.toLowerCase() + '/cards-black/new')
         .subscribe((response: any) => {
           resolve(response.data);
         });
     });
   }
 
-  submitWhiteCard(card, roomId, player) {
+  submitWhiteCards(cards, roomId, player) {
     const self = this;
     return new Promise((resolve, reject) => {
-      this.http.post('http://localhost:8000/api/room/' + roomId + '/submit-white', { card: card, name: player })
+      this.http.post('http://partycards.localtunnel.me/api/room/' + roomId.toLowerCase() + '/submit-white', { cards: cards, name: player.toLowerCase() })
         .subscribe((response: any) => {
           resolve();
         });
@@ -108,10 +117,10 @@ export class CardsService {
 
   getSubmissions(roomId): Promise<any[]> {
     return new Promise((resolve, reject) => {
-      this.http.get('http://localhost:8000/api/room/' + roomId + '/submissions')
-        .subscribe((response: any) => {
+      this.getRoomInfo(roomId)
+        .then(response => {
           const submissions = [];
-          for (let item of response.data) {
+          for (let item of response.submissions) {
             submissions.push(item.card);
           }
           resolve(submissions);

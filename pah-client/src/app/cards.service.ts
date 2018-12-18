@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { cards } from './cards.enum';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from '../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +18,7 @@ export class CardsService {
   createRoom(id, name) {
     const self = this;
     return new Promise((resolve, reject) => {
-      this.http.post('https://partycards.localtunnel.me/api/room', { id: id.toLowerCase(), name: name.toLowerCase() })
+      this.http.post(environment.baseApi + 'room', { id: id.toLowerCase(), name: name.toLowerCase() })
         .subscribe((response: any) => {
           resolve();
         });
@@ -27,7 +28,7 @@ export class CardsService {
   getRoomInfo(roomId): Promise<any> {
     const self = this;
     return new Promise((resolve, reject) => {
-      this.http.get('http://partycards.localtunnel.me/api/room/' + roomId.toLowerCase())
+      this.http.get(environment.baseApi + 'room/' + roomId.toLowerCase())
         .subscribe((response: any) => {
           resolve(response.data);
         });
@@ -37,7 +38,7 @@ export class CardsService {
   startGame(roomId) {
     const self = this;
     return new Promise((resolve, reject) => {
-      this.http.get('http://partycards.localtunnel.me/api/room/' + roomId.toLowerCase() + '/start')
+      this.http.get(environment.baseApi + 'room/' + roomId.toLowerCase() + '/start')
         .subscribe((response: any) => {
           resolve();
         });
@@ -65,7 +66,7 @@ export class CardsService {
   getCards() {
     const self = this;
     return new Promise((resolve, reject) => {
-      this.http.get('http://partycards.localtunnel.me/api/cards')
+      this.http.get(environment.baseApi + 'cards')
         .subscribe((response: any) => {
           self.cards = response.data;
           self.blackCards = self.cards.blackCards;
@@ -78,7 +79,7 @@ export class CardsService {
   getWhiteCards(roomId, num): Promise<any[]> {
     const self = this;
     return new Promise((resolve, reject) => {
-      this.http.get('http://partycards.localtunnel.me/api/room/' + roomId.toLowerCase() + '/cards-white/' + num)
+      this.http.get(environment.baseApi + 'room/' + roomId.toLowerCase() + '/cards-white/' + num)
         .subscribe((response: any) => {
           resolve(response.data);
         });
@@ -88,7 +89,7 @@ export class CardsService {
   getBlackCard(roomId): Promise<any> {
     const self = this;
     return new Promise((resolve, reject) => {
-      this.http.get('http://partycards.localtunnel.me/api/room/' + roomId.toLowerCase() + '/cards-black')
+      this.http.get(environment.baseApi + 'room/' + roomId.toLowerCase() + '/cards-black')
         .subscribe((response: any) => {
           resolve(response.data);
         });
@@ -98,7 +99,7 @@ export class CardsService {
   getNewBlackCard(roomId): Promise<any> {
     const self = this;
     return new Promise((resolve, reject) => {
-      this.http.get('http://partycards.localtunnel.me/api/room/' + roomId.toLowerCase() + '/cards-black/new')
+      this.http.get(environment.baseApi + 'room/' + roomId.toLowerCase() + '/cards-black/new')
         .subscribe((response: any) => {
           resolve(response.data);
         });
@@ -108,7 +109,7 @@ export class CardsService {
   submitWhiteCards(cards, roomId, player) {
     const self = this;
     return new Promise((resolve, reject) => {
-      this.http.post('http://partycards.localtunnel.me/api/room/' + roomId.toLowerCase() + '/submit-white', { cards: cards, name: player.toLowerCase() })
+      this.http.post(environment.baseApi + 'room/' + roomId.toLowerCase() + '/submit-white', { cards: cards, name: player.toLowerCase() })
         .subscribe((response: any) => {
           resolve();
         });

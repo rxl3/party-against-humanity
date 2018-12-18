@@ -4,6 +4,24 @@
   position: relative;
 }
 
+.title-main {
+  position: absolute;
+  top: 20%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 30px;
+  font-family: Comic Sans MS;
+}
+
+.logo-main {
+  position: absolute;
+  top: 30%;
+  left: 0;
+  right: 0;
+  text-align: center;
+}
+
 .room-input-container {
   position: absolute;
   top: 50%;

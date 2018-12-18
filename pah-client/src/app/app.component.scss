@@ -31,3 +31,23 @@
 .input-label {
   display: block;
 }
+
+.player-list {
+  text-align: center;
+  top: 100px;
+  position: relative;
+  width: 50%;
+  margin: auto;
+  word-break: break-word;
+}
+
+.player-text {
+  font-size: 16px;
+  margin: 5px;
+  text-transform: uppercase;
+}
+
+.player-title {
+  text-decoration: underline;
+  margin-bottom: 10px;
+}

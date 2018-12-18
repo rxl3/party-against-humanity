@@ -10,31 +10,31 @@ export class MainComponent implements OnInit {
 
   cards = [];
   submissions = [];
-  selectedCard;
+  selectedCard = [];
   blackCardVisible = false;
-  selectedBlackCard = { text: '' };
+  selectedBlackCard = { text: '', pick: 1 };
   blackCardFocus = false;
   numPlayers: number;
   @Input() activePlayer: boolean;
   @Input() roomId: string;
   @Input() playerName: string;
+  waitingPlayers;
+  round = 0;
+  submitted = false;
 
   constructor(private cardsService: CardsService) { }
 
   ngOnInit() {
-    this.cardsService.getPlayerStatus(this.roomId, this.playerName)
-      .then((status) => {
-        this.activePlayer = status.active;
-        if (!this.activePlayer) {
-          this.blackCardVisible = true;
-        }
-        return this.cardsService.getWhiteCards(this.roomId, 10)
-      })
+    if (this.activePlayer) {
+      this.blackCardVisible = true;
+    }
+    this.cardsService.getWhiteCards(this.roomId, 10)
       .then(response => {
         this.cards = response;
         if (!this.activePlayer) {
           this.pingBlackCard();
         }
+        this.pingWaitingPlayers();
       })
       .catch(err => {
         console.error(err);
@@ -55,8 +55,22 @@ export class MainComponent implements OnInit {
     }
   }
 
+  onClickSubmission(event) {
+    this.blackCardVisible = false;
+    const cardText = event.target.innerText;
+    let decoded = null;
+    let elem = document.createElement('textarea');
+    for (let card of this.submissions) {
+      elem.innerHTML = card;
+      decoded = elem.value;
+      if (decoded === cardText) {
+        this.selectedCard = card;
+      }
+    }
+  }
+
   submit() {
-    this.cardsService.submitWhiteCard(this.selectedCard, this.roomId, this.playerName)
+    this.cardsService.submitWhiteCards(this.selectedCard, this.roomId, this.playerName)
       .then(() => {
         let promise = null;
         if (this.activePlayer) {
@@ -73,11 +87,40 @@ export class MainComponent implements OnInit {
         return promise;
       })
       .then(() => {
-        this.selectedCard = null;
-        return this.cardsService.getPlayerStatus(this.roomId, this.playerName);
+        this.submitted = true;
+        this.pingRoundEnd();
       })
-      .then(playerResponse => {
-        this.activePlayer = playerResponse.active;
+      .catch(err => {
+        console.error(err);
+      });
+  }
+
+  pingRoundEnd() {
+    this.cardsService.getRoomInfo(this.roomId)
+      .then(response => {
+        if (response.round === this.round) {
+          setTimeout(() => { this.pingRoundEnd(); }, 3000);
+        } else {
+          this.round = response.round;
+          this.activePlayer = response.activePlayer === this.playerName;
+          this.selectedCard = [];
+          this.selectedBlackCard = { text: '', pick: 1 };
+          this.blackCardVisible = this.activePlayer === true;
+          this.submitted = false;
+          this.pingBlackCard();
+          this.pingWaitingPlayers();
+        }
+      });
+  }
+
+  pingWaitingPlayers() {
+    const self = this;
+    this.cardsService.getWaitingPlayers(this.roomId)
+      .then(response => {
+        this.waitingPlayers = response;
+        if (response.length > 0) {
+          setTimeout(() => { self.pingWaitingPlayers() }, 1000);
+        }
       })
       .catch(err => {
         console.error(err);
@@ -89,7 +132,6 @@ export class MainComponent implements OnInit {
     this.cardsService.getBlackCard(this.roomId)
       .then(response => {
         if (response) {
-          console.log(response);
           this.blackCardVisible = true;
           this.selectedBlackCard = response;
         } else {
@@ -106,6 +148,10 @@ export class MainComponent implements OnInit {
       .then(response => {
         this.blackCardVisible = true;
         this.selectedBlackCard = response.card;
+        this.selectedBlackCard.pick = 3;
+        for (let i = 0; i < this.selectedBlackCard.pick; i++) {
+          this.selectedCard.push(null);
+        }
         this.numPlayers = response.roomSize;
         this.pingSubmissions();
       })

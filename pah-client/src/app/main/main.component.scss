@@ -32,6 +32,21 @@
   background: white;
 }
 
+.card-zoom-background-black {
+  height: 45%;
+  width: 70%;
+  display: block;
+  position: absolute;
+  border: 2px solid black;
+  border-radius: 5px;
+  max-width: 280px;
+  max-height: 370px;
+  margin: auto;
+  left: -50px;
+  right: 0;
+  z-index: 1;
+}
+
 .card-zoom-background {
   height: 45%;
   width: 70%;
@@ -42,9 +57,39 @@
   max-width: 280px;
   max-height: 370px;
   margin: auto;
-  left: 50px;
+  left: 48px;
   right: 0;
   z-index: 1;
+}
+
+.card-zoom-background-2 {
+  height: 45%;
+  width: 70%;
+  display: block;
+  position: absolute;
+  border: 2px solid black;
+  border-radius: 5px;
+  max-width: 280px;
+  max-height: 370px;
+  margin: auto;
+  left: 90px;
+  right: 0;
+  z-index: 0;
+}
+
+.card-zoom-background-3 {
+  height: 45%;
+  width: 70%;
+  display: block;
+  position: absolute;
+  border: 2px solid black;
+  border-radius: 5px;
+  max-width: 280px;
+  max-height: 370px;
+  margin: auto;
+  left: 116px;
+  right: 0;
+  z-index: -1;
 }
 
 .card-zoom-text {
@@ -86,4 +131,25 @@
   right: 0;
   bottom: 0;
   margin: auto;
+}
+
+.players-waiting {
+  position: relative;
+  top: 56%;
+  width: 100%;
+  word-break: break-word;
+}
+
+.players-waiting-item {
+  margin: 0 5px;
+  text-transform: uppercase;
+}
+
+.players-waiting-title {
+  text-align: center;
+  text-decoration: underline;
+}
+
+.text-white {
+  color: white;
 }

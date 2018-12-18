@@ -1,34 +1,56 @@
 <div class="app-main">
-  <div class="card-zoom" *ngIf="!blackCardVisible">
-    <div class="card-zoom-text" *ngIf="selectedCard" [innerHTML]="selectedCard"></div>
-    <div class="card-zoom-text-alt card-grey" *ngIf="!selectedCard">Select a card from below...</div>
-    <div class="card-footer">Party Against Humanity</div>
-  </div>
+  <ng-container *ngIf="selectedBlackCard">
+    <div class="card-zoom" *ngIf="!blackCardVisible" (click)="selectedCard = null">
+      <div class="card-zoom-text" *ngIf="selectedCard" [innerHTML]="selectedCard"></div>
+      <div class="card-zoom-text-alt card-grey" *ngIf="!selectedCard">Select a card from below...</div>
+      <div class="card-footer">Party Against Humanity</div>
+    </div>
+  </ng-container>
   <div class="card-zoom card-black" *ngIf="blackCardVisible">
     <div class="card-zoom-text" *ngIf="selectedBlackCard" [innerHTML]="selectedBlackCard.text"></div>
     <div class="card-footer text-white">Party Against Humanity <div class="float-right" *ngIf="selectedBlackCard.pick">PICK {{selectedBlackCard.pick}}</div></div>
   </div>
-  <div class="card-zoom-background" (click)="focusWhiteCard()" *ngIf="blackCardVisible">
-    <div class="card-zoom-text" *ngIf="selectedCard" [innerHTML]="selectedCard"></div>
-    <div class="card-zoom-text-alt card-grey" *ngIf="!selectedCard">Select a card from below...</div>
-    <div class="card-footer">Party Against Humanity</div>
-  </div>
-  <div class="card-zoom-background card-black" (click)="focusBlackCard()" *ngIf="!blackCardVisible">
+  <ng-container *ngIf="selectedBlackCard">
+    <div class="card-zoom-background" (click)="focusWhiteCard()" *ngIf="blackCardVisible">
+      <div class="card-zoom-text" *ngIf="selectedCard" [innerHTML]="selectedCard"></div>
+      <div class="card-zoom-text-alt card-grey" *ngIf="!selectedCard">Select a card from below...</div>
+      <div class="card-footer">Party Against Humanity</div>
+    </div>
+    <ng-container *ngIf="selectedBlackCard.pick >= 2">
+      <div class="card-zoom-background-2" (click)="focusWhiteCard()" *ngIf="blackCardVisible">
+        <div class="card-zoom-text" *ngIf="selectedCard" [innerHTML]="selectedCard"></div>
+        <div class="card-zoom-text-alt card-grey" *ngIf="!selectedCard">Select a card from below...</div>
+        <div class="card-footer">Party Against Humanity</div>
+      </div>
+    </ng-container>
+    <ng-container *ngIf="selectedBlackCard.pick >= 3">
+      <div class="card-zoom-background-3" (click)="focusWhiteCard()" *ngIf="blackCardVisible">
+        <div class="card-zoom-text" *ngIf="selectedCard" [innerHTML]="selectedCard"></div>
+        <div class="card-zoom-text-alt card-grey" *ngIf="!selectedCard">Select a card from below...</div>
+        <div class="card-footer">Party Against Humanity</div>
+      </div>
+    </ng-container>
+  </ng-container>
+  <div class="card-zoom-background-black card-black" (click)="focusBlackCard()" *ngIf="!blackCardVisible">
     <div class="card-zoom-text" *ngIf="selectedBlackCard" [innerHTML]="selectedBlackCard.text"></div>
     <div class="card-footer text-white">Party Against Humanity <div class="float-right">PICK {{selectedBlackCard.pick}}</div></div>
   </div>
   <div class="button-row">
     <button class="button-primary" (click)="getBlackCard()" *ngIf="activePlayer && selectedBlackCard.text.length === 0">Get Black Card</button>
-    <button class="button-primary" (click)="submit()">Submit</button>
+    <button class="button-primary" (click)="submit()" [disabled]="(selectedBlackCard.text.length === 0 || selectedCard[0] === null || submitted || activePlayer && submissions.length < numPlayers.length - 1)">Submit</button>
+  </div>
+  <div class="players-waiting" *ngIf="waitingPlayers">
+    <div class="players-waiting-title">Waiting for:</div>
+    <span class="players-waiting-item" *ngFor="let player of waitingPlayers">{{player}}</span>
   </div>
   <div class="card-hand" *ngIf="!activePlayer">
       <ng-container *ngFor="let card of cards">
-        <app-card [card]="card" class="card" (click)="onClick($event)"></app-card>
+        <app-card [card]="card" class="card" (click)="onClick($event)" *ngIf="card !== selectedCard"></app-card>
       </ng-container>
   </div>
   <div class="card-hand" *ngIf="activePlayer">
       <ng-container *ngFor="let card of submissions">
-        <app-card [card]="card" class="card" (click)="onClick($event)"></app-card>
+        <app-card [card]="card" class="card" (click)="onClickSubmission($event)" [selected]="card === selectedCard" [ngClass]="{'text-white': submissions.length < numPlayers - 1}"></app-card>
       </ng-container>
   </div>
 </div>
